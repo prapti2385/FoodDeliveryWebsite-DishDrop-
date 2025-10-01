@@ -3,9 +3,9 @@ import { serverUrl } from "../src/App";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  setCurrentAddress,
   setCurrentCity,
   setCurrentState,
-  setUserData,
 } from "../src/redux/userSlice";
 
 const useGetCity = () => {
@@ -21,7 +21,12 @@ const useGetCity = () => {
       );
       dispatch(setCurrentCity(result?.data?.results[0].city));
       dispatch(setCurrentState(result?.data?.results[0].state));
-      dispatch(setCurrentState(result?.data?.results[0].cur));
+      dispatch(
+        setCurrentAddress(
+          result?.data?.results[0].address_line1 ||
+            result?.data?.results[0].address_line2
+        )
+      );
     });
   }, [userData]);
 };

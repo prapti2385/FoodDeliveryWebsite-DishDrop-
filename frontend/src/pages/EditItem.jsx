@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { FaUtensils } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,20 +7,34 @@ import axios from "axios";
 import { serverUrl } from "../App";
 import { setMyShopData } from "../redux/ownerSlice.js";
 import { ClipLoader } from "react-spinners";
+import { useParams } from "react-router-dom";
 
-const CreateEditShop = () => {
+const EditItem = () => {
   const navigate = useNavigate();
   const { myShopData } = useSelector((state) => state.owner);
-  const { currentState, currentCity, currentAddress } = useSelector(
-    (state) => state.user
-  );
-  const [name, setName] = useState(myShopData?.name || "");
-  const [address, setAddress] = useState(myShopData?.address || currentAddress);
-  const [city, setCity] = useState(myShopData?.city || currentCity);
-  const [state, setState] = useState(myShopData?.state || currentState);
-  const [frontendImage, setFrontendImage] = useState(myShopData?.image || null);
-  const [backendImage, setBackendImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState(0);
+  const [frontendImage, setFrontendImage] = useState(null);
+  const [backendImage, setBackendImage] = useState(null);
+  const [category, setCategory] = useState("");
+  const [foodType, setFoodType] = useState("veg");
+  const { itemId } = useParams();
+  const [currentItem, setCurrentItem] = useState(null);
+  
+  const categories = [
+    "Snacks",
+    "Main Course",
+    "Desserts",
+    "Pizza",
+    "Burgers",
+    "Sandwiches",
+    "South Indian",
+    "North Indian",
+    "Chinese",
+    "Fast Food",
+    "Others",
+  ];
   const dispatch = useDispatch();
 
   const handleImage = (e) => {
@@ -35,21 +49,20 @@ const CreateEditShop = () => {
     try {
       const formData = new FormData();
       formData.append("name", name);
-      formData.append("city", city);
-      formData.append("state", state);
-      formData.append("address", address);
+      formData.append("category", category);
+      formData.append("price", price);
+      formData.append("foodType", foodType);
+
       if (backendImage) {
         formData.append("image", backendImage);
       }
 
       const result = await axios.post(
-        `${serverUrl}/api/shop/create-edit`,
+        `${serverUrl}/api/item/edit-item/${itemId}`,
         formData,
         { withCredentials: true }
       );
-      console.log(result.data);
       dispatch(setMyShopData(result.data));
-      console.log(myShopData);
       setLoading(false);
       navigate("/");
     } catch (error) {
@@ -58,6 +71,28 @@ const CreateEditShop = () => {
     }
   };
 
+  useEffect(() => {
+    const handleGetItemById = async () => {
+      try {
+        const result = await axios.get(
+          `${serverUrl}/api/item/get-by-id/${itemId}`,
+          { withCredentials: true }
+        );
+        setCurrentItem(result.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    handleGetItemById();
+  }, [itemId]);
+
+  useEffect(() => {
+    setName(currentItem?.name || "");
+    setPrice(currentItem?.price || 0);
+    setCategory(currentItem?.category || "");
+    setFoodType(currentItem?.foodType || "");
+    setFrontendImage(currentItem?.image || "");
+  }, [currentItem]);
   return (
     <div className="flex justify-center flex-col items-center p-6 bg-gradient-to-br from-orange-50 relative to-white min-h-screen">
       <div
@@ -71,9 +106,7 @@ const CreateEditShop = () => {
           <div className="bg-orange-100 p-4 rounded-full mb-4">
             <FaUtensils className="text-[#ff4d2d] w-16 h-16" />
           </div>
-          <div className="text-3xl font-extrabold text-gray-900">
-            {myShopData ? "Edit Shop" : "Add Shop"}
-          </div>
+          <div className="text-3xl font-extrabold text-gray-900">Edit Item</div>
         </div>
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
@@ -83,14 +116,15 @@ const CreateEditShop = () => {
             <input
               type="text"
               value={name}
-              placeholder="Enter Shop Name"
+              placeholder="Enter Item Name"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               onChange={(e) => setName(e.target.value)}
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Shop Image
+              Food Image
             </label>
             <input
               type="file"
@@ -108,47 +142,51 @@ const CreateEditShop = () => {
               </div>
             )}
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                City
-              </label>
-              <input
-                value={city}
-                type="text"
-                placeholder="Enter City"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                onChange={(e) => setCity(e.target.value)}
-              />
-            </div>
-            <div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  State
-                </label>
-                <input
-                  value={state}
-                  type="text"
-                  placeholder="Enter State"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  onChange={(e) => setState(e.target.value)}
-                />
-              </div>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Price
+            </label>
+            <input
+              type="number"
+              value={price}
+              placeholder="Enter Price"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => setPrice(e.target.value)}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
+              Select Category
             </label>
-            <input
-              value={address}
+            <select
               type="text"
-              placeholder="Enter Shop Address"
+              value={category}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              onChange={(e) => setAddress(e.target.value)}
-            />
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat, index) => (
+                <option value={cat} key={index}>
+                  {cat}
+                </option>
+              ))}
+            </select>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Select Food Type
+            </label>
+            <select
+              type="text"
+              value={foodType}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+              onChange={(e) => setFoodType(e.target.value)}
+            >
+              <option value="veg">Veg</option>
+              <option value="non veg">Non Veg</option>
+            </select>
+          </div>
+
           <button
             className="w-full bg-[#ff4d2d] text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-orange-600 hover:shadow-lg transition-all duration-200 cursor-pointer"
             disabled={loading}
@@ -161,4 +199,4 @@ const CreateEditShop = () => {
   );
 };
 
-export default CreateEditShop;
+export default EditItem;
