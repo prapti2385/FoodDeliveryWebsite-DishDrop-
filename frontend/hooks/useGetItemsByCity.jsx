@@ -7,7 +7,7 @@ import { current } from "@reduxjs/toolkit";
 import { setItemsInMyCity, setShopsInMyCity } from "../src/redux/userSlice";
 
 const useGetItemsByCity = () => {
-  const { currentCity } = useSelector((state) => state.user);
+  const { currentCity, userData } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   useEffect(() => {
     const fetchItems = async () => {
@@ -25,7 +25,7 @@ const useGetItemsByCity = () => {
       }
     };
     fetchItems();
-  }, [currentCity]);
+  }, [currentCity, userData]);
 };
 
 export default useGetItemsByCity;

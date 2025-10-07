@@ -13,7 +13,9 @@ import { useNavigate } from "react-router-dom";
 
 const Nav = () => {
   const navigate = useNavigate();
-  const { userData, currentCity } = useSelector((state) => state.user);
+  const { userData, currentCity, cartItems } = useSelector(
+    (state) => state.user
+  );
   const { myShopData } = useSelector((state) => state.owner);
   const [showInfo, setShowInfo] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -114,14 +116,17 @@ const Nav = () => {
           </>
         ) : (
           <>
-            <div className="relative cursor-pointer">
+            <div
+              className="relative cursor-pointer"
+              onClick={() => navigate("/cart")}
+            >
               <IoCartOutline size={25} className="text-[#ff4d2d]" />
               <span className="absolute right-[-9px] top-[-12px] text-[#ff4d2d] ">
-                0
+                {cartItems.length}
               </span>
             </div>
             <button className="hidden md:block px-3 py-1 rouned-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium">
-              My Orders
+              {cartItems.length}
             </button>
           </>
         )}
