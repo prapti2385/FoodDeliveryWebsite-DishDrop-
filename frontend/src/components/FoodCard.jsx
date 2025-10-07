@@ -66,14 +66,14 @@ const FoodCard = ({ data }) => {
               className="px-2 py-1 hover:bg-gray-100 transition"
               onClick={handleDecrease}
             >
-              <FaMinus />
+              <FaMinus size={12}/>
             </button>
             <span>{quantity}</span>
             <button
               className="px-2 py-1 hover:bg-gray-100 transition"
               onClick={handleIncrease}
             >
-              <FaPlus />
+              <FaPlus size={12}/>
             </button>
             <button
               className={`${
