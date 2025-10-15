@@ -126,7 +126,7 @@ const Nav = () => {
               </span>
             </div>
             <button className="hidden md:block px-3 py-1 rouned-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium">
-              {cartItems.length}
+              My Orders
             </button>
           </>
         )}
