@@ -59,7 +59,7 @@ const App = () => {
         element={userData ? <CartPage /> : <Navigate to={"/signin"} />}
       />
       <Route
-        path="/Checkout"
+        path="/checkout"
         element={userData ? <Checkout /> : <Navigate to={"/signin"} />}
       />
     </Routes>
