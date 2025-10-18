@@ -47,7 +47,6 @@ const CreateEditShop = () => {
         formData,
         { withCredentials: true }
       );
-      console.log(result.data);
       dispatch(setMyShopData(result.data));
       console.log(myShopData);
       setLoading(false);
