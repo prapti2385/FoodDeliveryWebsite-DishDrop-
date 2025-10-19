@@ -13,14 +13,17 @@ import AddItem from "./pages/AddItem";
 import EditItem from "./pages/EditItem";
 import useGetShopByCity from "../hooks/useGetShopByCity";
 import useGetItemsByCity from "../hooks/useGetItemsByCity";
+import useGetMyOrders from "../hooks/useGetMyOrders";
 import CartPage from "./pages/CartPage";
 import Checkout from "./pages/Checkout";
 import OrderPlaced from "./pages/OrderPlaced";
 import MyOrders from "./pages/MyOrders";
 
+
 export const serverUrl = "http://localhost:8000";
 
 const App = () => {
+  useGetMyOrders();
   useGetCurrentUser();
   useGetCity();
   useGetMyShop();

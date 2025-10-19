@@ -1,5 +1,6 @@
 import Shop from "../models/shop.model.js";
 import Order from "../models/order.model.js";
+import User from "../models/user.model.js";
 export const placeOrder = async (req, res) => {
   try {
     const { cartItems, paymentMethod, deliveryAddress, totalAmount } = req.body;
@@ -60,6 +61,41 @@ export const placeOrder = async (req, res) => {
 
     return res.status(201).json(newOrder);
   } catch (error) {
-    return res.status(500).json({ message: `Place order error ${error.message}` });
+    return res
+      .status(500)
+      .json({ message: `Place order error ${error.message}` });
+  }
+};
+
+export const getMyOrders = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user.role === "User") {
+      const orders = await Order.find({ user: req.userId })
+        .sort({ createdAt: -1 })
+        .populate("shopOrders.shop", "name")
+        .populate("shopOrders.owner", "name email mobile")
+        .populate("shopOrders.shopOrderItems.item", "name image price");
+      return res.status(200).json(orders);
+    } else if (user.role === "Owner") {
+      const orders = await Order.find({ "shopOrders.owner": req.userId })
+        .sort({ createdAt: -1 })
+        .populate("shopOrders.shop", "name")
+        .populate("user")
+        .populate("shopOrders.shopOrderItems.item", "name image price");
+      const filteredOrders = orders.map((order) => ({
+        _id: order._id,
+        paymentMethod: order.paymentMethod,
+        user: order.user,
+        shopOrders: order.shopOrders.find((o) => o.owner._id.toString() === req.userId),
+        deliveryAddress: order.deliveryAddress,
+        createdAt: order.createdAt,
+      }));
+      return res.status(200).json(filteredOrders);
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Get My Orders Error ${error.message}` });
   }
 };
