@@ -87,5 +87,6 @@ export const {
   updateQuantity,
   removeCartItem,
   setMyOrders,
+  addMyOrder,
 } = userSlice.actions;
 export default userSlice.reducer;
