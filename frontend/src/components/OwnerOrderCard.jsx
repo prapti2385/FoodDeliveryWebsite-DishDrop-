@@ -1,7 +1,25 @@
+import axios from "axios";
 import React from "react";
 import { FaPhoneAlt } from "react-icons/fa";
+import { serverUrl } from "../App";
+import { useDispatch } from "react-redux";
+import { updateOrderStatus } from "../redux/userSlice";
 
 const OwnerOrderCard = ({ data }) => {
+  const dispatch = useDispatch();
+  const handleUpdateStatus = async (orderId, shopId, status) => {
+    try {
+      const result = await axios.post(
+        `${serverUrl}/api/order/update-status/${orderId}/${shopId}`,
+        { status },
+        { withCredentials: true }
+      );
+      dispatch(updateOrderStatus({ orderId, shopId, status }));
+      console.log(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="bg-white rounded-lg shadow p-4 space-y-4">
       <div>
@@ -45,16 +63,23 @@ const OwnerOrderCard = ({ data }) => {
           </span>
         </span>
         <select
-          value={data.shopOrders.status}
           className="rounded-md border px-3 py-1 text-sm focus:outline-none focus:ring-2 border-[#ff4d2d]"
+          onChange={(e) =>
+            handleUpdateStatus(
+              data._id,
+              data.shopOrders.shop._id ?? data.shopOrders.shop,
+              e.target.value
+            )
+          }
         >
+          <option value="">Change</option>
           <option value="pending">Pending</option>
           <option value="preparing">Preparing</option>
           <option value="out for delivery">Out For Delivery</option>
         </select>
       </div>
       <div className="text-right font-bold text-gray-800 text-sm">
-        Total:  ₹{data.shopOrders.subTotal}
+        Total: ₹{data.shopOrders.subTotal}
       </div>
     </div>
   );
