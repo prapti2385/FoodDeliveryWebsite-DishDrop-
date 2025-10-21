@@ -30,6 +30,11 @@ const shopOrderSchema = mongoose.Schema(
       enum: ["pending", "preparing", "out for delivery", "delivered"],
       default: "pending",
     },
+    assignment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DeliveryAssignment",
+      default: null,
+    },
   },
   { timestamps: true }
 );
