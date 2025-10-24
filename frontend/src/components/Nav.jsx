@@ -122,15 +122,18 @@ const Nav = () => {
           </>
         ) : (
           <>
-            <div
-              className="relative cursor-pointer"
-              onClick={() => navigate("/cart")}
-            >
-              <IoCartOutline size={25} className="text-[#ff4d2d]" />
-              <span className="absolute right-[-9px] top-[-12px] text-[#ff4d2d] ">
-                {cartItems.length}
-              </span>
-            </div>
+            {userData.role === "User" && (
+              <div
+                className="relative cursor-pointer"
+                onClick={() => navigate("/cart")}
+              >
+                <IoCartOutline size={25} className="text-[#ff4d2d]" />
+                <span className="absolute right-[-9px] top-[-12px] text-[#ff4d2d] ">
+                  {cartItems.length}
+                </span>
+              </div>
+            )}
+
             <button
               className="hidden md:block px-3 py-1 rouned-lg bg-[#ff4d2d]/10 text-[#ff4d2d] text-sm font-medium"
               onClick={() => navigate("/my-orders")}
@@ -147,7 +150,13 @@ const Nav = () => {
           {userData?.fullName?.slice(0, 1) || "?"}
         </div>
         {showInfo && (
-          <div className="fixed top-[80px] right-[10px] md:right-[10%] lg:right-[25%] w-[180px] bg-white shadow-2xl rounded-xl p-[20px] flex flex-col gap-[20px] z-[9999]">
+          <div
+            className={`fixed top-[80px] right-[10px] ${
+              userData.role === "Delivery Boy"
+                ? "md:right-[20%] lg:right-[40%]"
+                : "md-right-[10%] lg:right-[25%]"
+            } w-[180px] bg-white shadow-2xl rounded-xl p-[20px] flex flex-col gap-[20px] z-[9999]`}
+          >
             <div className="text-[17px] font-semibold">
               {userData?.fullName}
             </div>
