@@ -4,8 +4,10 @@ import { FaPhoneAlt } from "react-icons/fa";
 import { serverUrl } from "../App";
 import { useDispatch } from "react-redux";
 import { updateOrderStatus } from "../redux/userSlice";
+import { useState } from "react";
 
 const OwnerOrderCard = ({ data }) => {
+  const [availableBoys, setAvailableBoys] = useState([]);
   const dispatch = useDispatch();
   const handleUpdateStatus = async (orderId, shopId, status) => {
     try {
@@ -15,6 +17,7 @@ const OwnerOrderCard = ({ data }) => {
         { withCredentials: true }
       );
       dispatch(updateOrderStatus({ orderId, shopId, status }));
+      setAvailableBoys(result.data.availableBoys);
       console.log(result.data);
     } catch (error) {
       console.log(error);
@@ -42,7 +45,7 @@ const OwnerOrderCard = ({ data }) => {
         </p>
       </div>
       <div className="flex space-x-4 overflow-x-auto pb-2">
-        {data.shopOrders.shopOrderItems.map((item, index) => (
+        {data.shopOrders?.shopOrderItems?.map((item, index) => (
           <div
             key={index}
             className="flex-shrink-0 w-40 border rounded-lg p-2 bg-white"
@@ -59,7 +62,7 @@ const OwnerOrderCard = ({ data }) => {
         <span className="text-sm">
           Status:{" "}
           <span className="font-semibold capitalize text-[#ff4d2d]">
-            {data.shopOrders.status.toUpperCase()}
+            {data.shopOrders?.status?.toUpperCase()}
           </span>
         </span>
         <select
@@ -67,7 +70,7 @@ const OwnerOrderCard = ({ data }) => {
           onChange={(e) =>
             handleUpdateStatus(
               data._id,
-              data.shopOrders.shop._id ?? data.shopOrders.shop,
+              data.shopOrders?.shop?._id ?? data.shopOrders.shop,
               e.target.value
             )
           }
@@ -78,6 +81,20 @@ const OwnerOrderCard = ({ data }) => {
           <option value="out for delivery">Out For Delivery</option>
         </select>
       </div>
+      {data.shopOrders.status === "out for delivery" && (
+        <div className="mt-3 p-2 border rounded-lg text-sm bg-orange-50">
+          <p>Available Delivery Boys: </p>
+          {availableBoys.length > 0 ? (
+            availableBoys.map((b, index) => (
+              <div className="text-gray-800">
+                {b.fullName} - {b.mobile}
+              </div>
+            ))
+          ) : (
+            <div>Waiting for Delivery Boy to accept</div>
+          )}
+        </div>
+      )}
       <div className="text-right font-bold text-gray-800 text-sm">
         Total: ₹{data.shopOrders.subTotal}
       </div>
