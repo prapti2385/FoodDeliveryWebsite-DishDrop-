@@ -233,6 +233,7 @@ export const acceptOrder = async (req, res) => {
     if (!assignment) {
       return res.status(400).json({ message: "Assignment not found" });
     }
+
     if (assignment.status != "broadcasted") {
       return res.status(400).json({ message: "Assignment is expired" });
     }
@@ -257,9 +258,7 @@ export const acceptOrder = async (req, res) => {
     if (!order) {
       return res.status(400).json({ message: "Order not found" });
     }
-    const shopOrder = order.shopOrders.find(
-      (so) => so._id == assignment.shopOrderId
-    );
+    const shopOrder = order.shopOrders.id(assignment.shopOrderId);
     shopOrder.assignedDeliveryBoy = req.userId;
     await order.save();
     return res.status(200).json({ message: "Order accepted" });

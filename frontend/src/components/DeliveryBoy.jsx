@@ -33,6 +33,7 @@ const DeliveryBoy = () => {
       console.log(error);
     }
   };
+  
   useEffect(() => {
     getAssignment();
   }, [userData]);
@@ -72,7 +73,10 @@ const DeliveryBoy = () => {
                       {a.items.length} items | ₹{a.subTotal}
                     </p>
                   </div>
-                  <button className="bg-orange-500 text-white px-4 py-1 rounded-lg text-sm hover:bg-orange-600">
+                  <button
+                    className="bg-orange-500 text-white px-4 py-1 rounded-lg text-sm hover:bg-orange-600"
+                    onClick={() => acceptOrder(a.assignmentId)}
+                  >
                     Accept
                   </button>
                 </div>
