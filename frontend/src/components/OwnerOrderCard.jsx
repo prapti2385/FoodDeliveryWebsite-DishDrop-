@@ -83,13 +83,19 @@ const OwnerOrderCard = ({ data }) => {
       </div>
       {data.shopOrders.status === "out for delivery" && (
         <div className="mt-3 p-2 border rounded-lg text-sm bg-orange-50">
-          <p>Available Delivery Boys: </p>
+          {data.shopOrders.assignedDeliveryBoy ? (
+            <p>Assigned Delivery Boys: </p>
+          ) : (
+            <p>Available Delivery Boys:</p>
+          )}
           {availableBoys.length > 0 ? (
             availableBoys.map((b, index) => (
               <div className="text-gray-800">
                 {b.fullName} - {b.mobile}
               </div>
             ))
+          ) : data.shopOrders.assignedDeliveryBoy ? (
+            <div>{data.shopOrders.assignedDeliveryBoy?.fullName}</div>
           ) : (
             <div>Waiting for Delivery Boy to accept</div>
           )}
