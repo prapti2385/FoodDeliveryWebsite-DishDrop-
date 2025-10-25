@@ -95,7 +95,10 @@ const OwnerOrderCard = ({ data }) => {
               </div>
             ))
           ) : data.shopOrders.assignedDeliveryBoy ? (
-            <div>{data.shopOrders.assignedDeliveryBoy?.fullName}</div>
+            <div>
+              {data.shopOrders.assignedDeliveryBoy?.fullName}-
+              {data.shopOrders.assignedDeliveryBoy.mobile}
+            </div>
           ) : (
             <div>Waiting for Delivery Boy to accept</div>
           )}
