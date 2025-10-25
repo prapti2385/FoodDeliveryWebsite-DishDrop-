@@ -20,6 +20,19 @@ const DeliveryBoy = () => {
     }
   };
 
+  const acceptOrder = async (assignmentId) => {
+    try {
+      const result = await axios.get(
+        `${serverUrl}/api/order/accept-order/${assignmentId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
     getAssignment();
   }, [userData]);

@@ -226,7 +226,7 @@ export const getDeliveryBoyAssignment = async (req, res) => {
   }
 };
 
-const acceptOrder = async (req, res) => {
+export const acceptOrder = async (req, res) => {
   try {
     const { assignmentId } = req.params;
     const assignment = await DeliveryAssignment.findById(assignmentId);
