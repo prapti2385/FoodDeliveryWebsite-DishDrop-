@@ -60,20 +60,20 @@ const FoodCard = ({ data }) => {
         </div>
 
         <div className="flex items-center justify-between mt-auto pt-3">
-          <span className="font-bold text-gray-900 text-lg">{data.price}</span>
+          <span className="font-bold text-gray-900 text-lg">₹{data.price}</span>
           <div className="flex items-center border rounded-full overflow-hidden shadow-sm">
             <button
               className="px-2 py-1 hover:bg-gray-100 transition"
               onClick={handleDecrease}
             >
-              <FaMinus size={12}/>
+              <FaMinus size={12} />
             </button>
             <span>{quantity}</span>
             <button
               className="px-2 py-1 hover:bg-gray-100 transition"
               onClick={handleIncrease}
             >
-              <FaPlus size={12}/>
+              <FaPlus size={12} />
             </button>
             <button
               className={`${
