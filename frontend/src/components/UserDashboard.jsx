@@ -8,12 +8,12 @@ import { FaChevronCircleRight } from "react-icons/fa";
 import { useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { serverUrl } from "../App.jsx";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { currentCity, shopsInMyCity, itemsInMyCity } = useSelector(
-    (state) => state.user
-  );
+  const { currentCity, shopsInMyCity, itemsInMyCity, searchItems } =
+    useSelector((state) => state.user);
   const [showLeftCatButton, setShowLeftCatButton] = useState(false);
   const [showRightCatButton, setShowRightCatButton] = useState(false);
   const [showLeftShopButton, setShowLeftShopButton] = useState(false);
@@ -43,6 +43,7 @@ const UserDashboard = () => {
       );
     }
   };
+
   const scrollHandler = (ref, direction) => {
     if (ref.current) {
       ref.current.scrollBy({
@@ -75,6 +76,18 @@ const UserDashboard = () => {
     <div className="w-screen min-h-screen flex flex-col gap-5 items-center bg-[#fff9f6] overflow-y-auto">
       <Nav />
 
+      {searchItems && searchItems.length > 0 && (
+        <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-5 bg-white shadow-md rounded-2xl mt-4">
+          <h1 className="text-gray-900 text-2xl sm:text-3xl font-semibold border-b border-gray-200 pb-2">
+            Search Results
+          </h1>
+          <div className="w-full h-auto flex flex-wrap gap-6 justify-center">
+            {searchItems.map((item) => (
+              <FoodCard data={item} />
+            ))}
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-[10px]">
         <h1 className="text-gray-800 text-2xl sm:text-3xl">
           Inspiration for your first order

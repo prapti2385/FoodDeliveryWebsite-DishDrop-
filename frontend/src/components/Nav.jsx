@@ -7,15 +7,17 @@ import { FaPlus } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { RxCross2 } from "react-icons/rx";
 import { serverUrl } from "../App";
-import { setUserData } from "../redux/userSlice.js";
+import { setSearchItems, setUserData } from "../redux/userSlice.js";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const Nav = () => {
   const navigate = useNavigate();
   const { userData, currentCity, cartItems } = useSelector(
     (state) => state.user
   );
+  const [query, setQuery] = useState();
   const { myShopData } = useSelector((state) => state.owner);
   const [showInfo, setShowInfo] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -30,6 +32,26 @@ const Nav = () => {
       console.log(error);
     }
   };
+  const handleSearchItems = async (query) => {
+    try {
+      const result = await axios.get(
+        `${serverUrl}/api/item/search-items?query=${query}&city=${currentCity}`,
+        { withCredentials: true }
+      );
+      dispatch(setSearchItems(result.data));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (query) {
+      handleSearchItems(query);
+    } else {
+      dispatch(setSearchItems(null));
+    }
+  }, [query]);
+
   return (
     <div className="w-full h-[80px] flex items-center justify-between md:justify-center gap-[30px] px-[20px] fixed top-0 z-[9999] bg-[#fff9f6] overflow-visible">
       {showSearch && userData.role === "User" && (
@@ -44,6 +66,7 @@ const Nav = () => {
               type="text"
               placeholder="Search delicious food.."
               className="px-[10px] text-gray-700 outline-0 w-full"
+              onChange={(e) => setQuery(e.target.value)}
             />
           </div>
         </div>
@@ -61,6 +84,7 @@ const Nav = () => {
               type="text"
               placeholder="Search delicious food.."
               className="px-[10px] text-gray-700 outline-0 w-full"
+              onChange={(e) => setQuery(e.target.value)}
             />
           </div>
         </div>

@@ -148,3 +148,29 @@ export const getItemsByShop = async (req, res) => {
       .json({ message: `Get Items By Shop error ${error}` });
   }
 };
+
+export const searchItems = async (req, res) => {
+  try {
+    const { query, city } = req.query;
+    if (!query || !city) {
+      return null;
+    }
+    const shops = await Shop.find({
+      city: { $regex: new RegExp(`^${city}$`, "i") },
+    }).populate("items");
+    if (!shops) {
+      return res.status(400).json({ message: "Shops not found" });
+    }
+    const shopIds = shops.map((s) => s._id);
+    const items = await Item.find({
+      shop: { $in: shopIds },
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+      ],
+    }).populate("shop", "name image");
+    return res.status(200).json(items);
+  } catch (error) {
+    return res.status(500).json({ message: `Search Items error ${error}` });
+  }
+};
