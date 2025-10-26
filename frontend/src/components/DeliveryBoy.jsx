@@ -155,7 +155,9 @@ const DeliveryBoy = () => {
             {!showOtpBox ? (
               <button
                 className="mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-xl shadow-md hover:bg-green-600 active:scale-95 transition-all duration-200"
-                onClick={() => sendOtp(currentOrder._id, currentOrder.shopOrder._id)}
+                onClick={() =>
+                  sendOtp(currentOrder._id, currentOrder.shopOrder._id)
+                }
               >
                 Mark As Delivered
               </button>
