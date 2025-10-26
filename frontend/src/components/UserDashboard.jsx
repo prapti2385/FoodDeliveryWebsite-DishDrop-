@@ -16,6 +16,20 @@ const UserDashboard = () => {
   const [showRightCatButton, setShowRightCatButton] = useState(false);
   const [showLeftShopButton, setShowLeftShopButton] = useState(false);
   const [showRightShopButton, setShowRightShopButton] = useState(false);
+  const [updatedItemsList, setUpdatedItemsList] = useState([]);
+
+  const handleFilterByCategory = (category) => {
+    if (category == "All") {
+      setUpdatedItemsList(itemsInMyCity);
+    } else {
+      const filteredList = itemsInMyCity.filter((i) => i.category === category);
+      setUpdatedItemsList(filteredList);
+    }
+  };
+
+  useEffect(() => {
+    setUpdatedItemsList(itemsInMyCity);
+  }, [itemsInMyCity]);
   const catScrollRef = useRef();
   const shopScrollRef = useRef();
   const updateButton = (ref, setLeftButton, setRightButton) => {
@@ -78,7 +92,12 @@ const UserDashboard = () => {
             ref={catScrollRef}
           >
             {categories.map((cat, index) => (
-              <CategoryCard name={cat.category} image={cat.image} key={index} />
+              <CategoryCard
+                name={cat.category}
+                image={cat.image}
+                key={index}
+                onClick={() => handleFilterByCategory(cat.category)}
+              />
             ))}
           </div>
           {showRightCatButton && (
@@ -128,7 +147,7 @@ const UserDashboard = () => {
       <div className="w-full max-w-6xl flex flex-col gap-5 items-start p-[10px]">
         <h1 className="text-gray-800 text-2xl sm:text-3xl">Suggested Items</h1>
         <div className="w-full h-auto flex flex-wrap gap-[20px] justify-center">
-          {(itemsInMyCity || []).map((item, index) => (
+          {(updatedItemsList || []).map((item, index) => (
             <FoodCard key={index} data={item} />
           ))}
         </div>
