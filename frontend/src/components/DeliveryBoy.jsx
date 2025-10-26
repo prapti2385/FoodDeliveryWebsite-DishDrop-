@@ -10,6 +10,7 @@ import DeliveryBoyTracking from "./DeliveryBoyTracking";
 const DeliveryBoy = () => {
   const { userData } = useSelector((state) => state.user);
   const [currentOrder, setCurrentOrder] = useState();
+  const [otp, setOtp] = useState("");
   const [showOtpBox, setShowOtpBox] = useState(false);
   const [availableAssignments, setAvailableAssignments] = useState(null);
   const getAssignment = async () => {
@@ -38,6 +39,34 @@ const DeliveryBoy = () => {
     }
   };
 
+  const sendOtp = async (orderId, shopOrderId) => {
+    setShowOtpBox(true);
+    try {
+      const result = await axios.post(
+        `${serverUrl}/api/order/send-delivery-otp`,
+        { shopOrderId, orderId },
+        { withCredentials: true }
+      );
+
+      console.log(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const verifyOtp = async (orderId, shopOrderId, otp) => {
+    try {
+      const result = await axios.post(
+        `${serverUrl}/api/order/verify-delivery-otp`,
+        { shopOrderId, orderId, otp },
+        { withCredentials: true }
+      );
+      console.log(result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const getCurrentOrder = async (req, res) => {
     try {
       const result = await axios.get(
@@ -48,10 +77,6 @@ const DeliveryBoy = () => {
     } catch (error) {
       console.log(error);
     }
-  };
-
-  const handleSendOtp = () => {
-    setShowOtpBox(true);
   };
 
   useEffect(() => {
@@ -130,7 +155,7 @@ const DeliveryBoy = () => {
             {!showOtpBox ? (
               <button
                 className="mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-xl shadow-md hover:bg-green-600 active:scale-95 transition-all duration-200"
-                onClick={handleSendOtp}
+                onClick={() => sendOtp(currentOrder._id, currentOrder.shopOrder._id)}
               >
                 Mark As Delivered
               </button>
@@ -146,8 +171,15 @@ const DeliveryBoy = () => {
                   type="text"
                   className="w-full border px-3 py-2 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
                   placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(event) => setOtp(event.target.value)}
                 />
-                <button className="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold hover:bg-orange-600 transition-all">
+                <button
+                  className="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold hover:bg-orange-600 transition-all"
+                  onClick={() =>
+                    verifyOtp(currentOrder._id, currentOrder.shopOrder._id, otp)
+                  }
+                >
                   Submit OTP
                 </button>
               </div>

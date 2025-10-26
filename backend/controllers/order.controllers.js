@@ -2,6 +2,7 @@ import Shop from "../models/shop.model.js";
 import Order from "../models/order.model.js";
 import User from "../models/user.model.js";
 import DeliveryAssignment from "../models/deliveryAssignment.model.js";
+import { sendDeliveryOTP } from "../utils/mail.js";
 export const placeOrder = async (req, res) => {
   try {
     const { cartItems, paymentMethod, deliveryAddress, totalAmount } = req.body;
@@ -348,5 +349,57 @@ export const getOrderById = async (req, res) => {
     return res.status(200).json(order);
   } catch (error) {
     return res.status(500).json({ message: `Get By Id order error ${error}` });
+  }
+};
+
+export const sendDeliveryOtp = async (req, res) => {
+  try {
+    const { orderId, shopOrderId } = req.body;
+    const order = await Order.findById(orderId).populate("user");
+    const shopOrder = order.shopOrders.find((so) => so._id == shopOrderId);
+    if (!order || !shopOrder) {
+      return res
+        .status(400)
+        .json({ message: "No Order or no shop order found" });
+    }
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    shopOrder.deliveryOtp = otp;
+    shopOrder.otpExpires = Date.now() + 5 * 60 * 60 * 1000;
+    await order.save();
+    await sendDeliveryOTP(order.user, otp);
+    return res
+      .status(200)
+      .json({ message: ` OTP sent successfully ${order.user.fullName}` });
+  } catch (error) {
+    return res.status(500).json({ message: `Delivery OTP error ${error}` });
+  }
+};
+
+export const verifyDeliveryOtp = async (req, res) => {
+  try {
+    const { shopOrderId, orderId, otp } = req.body;
+    const order = await Order.findById(orderId);
+    const shopOrder = order.shopOrders.id(shopOrderId);
+    if (!order || !shopOrder) {
+      return res.status(400).json({ message: "Order or ShopOrder not found" });
+    }
+    if (
+      shopOrder.deliveryOtp !== otp ||
+      !shopOrder.otpExpires ||
+      shopOrder.otpExpires < Date.now()
+    ) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+    shopOrder.status = "delivered";
+    shopOrder.deliveredAt = Date.now();
+    await order.save();
+    await DeliveryAssignment.deleteOne({
+      shopOrderId: shopOrder._id,
+      order: order._id,
+      assignedTo: shopOrder.assignedDeliveryBoy,
+    });
+    return res.status(200).json({ message: "OTP verified successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: `OTP verification error ${error}` });
   }
 };
