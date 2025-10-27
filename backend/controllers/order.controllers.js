@@ -3,6 +3,14 @@ import Order from "../models/order.model.js";
 import User from "../models/user.model.js";
 import DeliveryAssignment from "../models/deliveryAssignment.model.js";
 import { sendDeliveryOTP } from "../utils/mail.js";
+import Razorpay from "razorpay";
+import "dotenv/config";
+
+let instance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
 export const placeOrder = async (req, res) => {
   try {
     const { cartItems, paymentMethod, deliveryAddress, totalAmount } = req.body;
@@ -53,6 +61,12 @@ export const placeOrder = async (req, res) => {
         };
       })
     );
+
+    if (paymentMethod == "online") {
+      const razorOrder = instance.orders.create({
+        amount
+      });
+    }
     const newOrder = await Order.create({
       user: req.userId,
       paymentMethod,
