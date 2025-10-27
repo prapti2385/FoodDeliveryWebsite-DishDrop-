@@ -9,6 +9,7 @@ import {
   getOrderById,
   sendDeliveryOtp,
   verifyDeliveryOtp,
+  verifyPayment,
 } from "../controllers/order.controllers.js";
 import isAuth from "../middlewares/isAuth.js";
 
@@ -23,5 +24,6 @@ orderRouter.get("/get-current-order", isAuth, getCurrentOrder);
 orderRouter.get("/get-order-by-id/:orderId", isAuth, getOrderById);
 orderRouter.post("/send-delivery-otp", isAuth, sendDeliveryOtp);
 orderRouter.post("/verify-delivery-otp", isAuth, verifyDeliveryOtp);
+orderRouter.post("/verify-payment", isAuth, verifyPayment);
 
 export default orderRouter;

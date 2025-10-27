@@ -63,8 +63,24 @@ export const placeOrder = async (req, res) => {
     );
 
     if (paymentMethod == "online") {
-      const razorOrder = instance.orders.create({
-        amount
+      const razorOrder = await instance.orders.create({
+        amount: Math.round(totalAmount * 100),
+        currency: "INR",
+        receipt: `receipt_${Date.now()}`,
+      });
+      const newOrder = await Order.create({
+        user: req.userId,
+        paymentMethod,
+        deliveryAddress,
+        totalAmount,
+        shopOrders,
+        razorpayOrderId: (await razorOrder).id,
+        payment: false,
+      });
+
+      return res.status(200).json({
+        razorOrder,
+        orderId: newOrder._id,
       });
     }
     const newOrder = await Order.create({
@@ -86,6 +102,29 @@ export const placeOrder = async (req, res) => {
     return res
       .status(500)
       .json({ message: `Place order error ${error.message}` });
+  }
+};
+
+export const verifyPayment = async (req, res) => {
+  try {
+    const { razorpayPaymentId, orderId } = req.body;
+    const payment = await instance.payments.fetch(razorpayPaymentId);
+    if (!payment || payment.status !== "captured") {
+      return res.status(400).json({ message: `No payment made` });
+    }
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(400).json({ message: "Order not found" });
+    }
+
+    order.payment = true;
+    order.razorpayPayment = razorpayPaymentId;
+    await order.populate("shopOrders.shopOrderItems.item", "name image price");
+    await order.populate("shopOrders.shop", "name");
+    await order.save();
+    return res.status(200).json(order);
+  } catch (error) {
+    return res.status(500).json({ message: `Verify payment error ${error}` });
   }
 };
 
