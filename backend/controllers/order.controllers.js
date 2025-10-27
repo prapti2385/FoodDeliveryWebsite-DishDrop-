@@ -154,6 +154,7 @@ export const getMyOrders = async (req, res) => {
         ),
         deliveryAddress: order.deliveryAddress,
         createdAt: order.createdAt,
+        payment: order.payment,
       }));
       return res.status(200).json(filteredOrders);
     }

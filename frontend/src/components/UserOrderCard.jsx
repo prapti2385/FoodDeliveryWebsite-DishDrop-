@@ -25,7 +25,11 @@ const UserOrderCard = ({ data }) => {
             {data.paymentMethod?.toUpperCase()}
           </p>
           <p className="font-medium text-blue-600">
-            {data.shopOrders[0].status.toUpperCase()}
+            {data.paymentMethod?.toUpperCase() === "COD"
+              ? data.shopOrders[0].status.toUpperCase()
+              : data.payment
+              ? "True"
+              : "False"}
           </p>
         </div>
       </div>

@@ -93,7 +93,7 @@ const Checkout = () => {
             { withCredentials: true }
           );
           dispatch(addMyOrder(result.data));
-          navigate("order-placed");
+          navigate("/order-placed");
         } catch (error) {
           console.log(error);
         }
