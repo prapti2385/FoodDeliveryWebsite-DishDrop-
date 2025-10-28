@@ -74,7 +74,7 @@ export const placeOrder = async (req, res) => {
         deliveryAddress,
         totalAmount,
         shopOrders,
-        razorpayOrderId: (await razorOrder).id,
+        razorpayOrderId: razorOrder.id,
         payment: false,
       });
 
@@ -83,6 +83,7 @@ export const placeOrder = async (req, res) => {
         orderId: newOrder._id,
       });
     }
+
     const newOrder = await Order.create({
       user: req.userId,
       paymentMethod,
@@ -96,6 +97,27 @@ export const placeOrder = async (req, res) => {
       "name image price"
     );
     await newOrder.populate("shopOrders.shop", "name");
+    await newOrder.populate("shopOrders.owner", "fullName socketId");
+    await newOrder.populate("user", "fullName email mobile");
+
+    const io = req.app.get("io");
+
+    if (io) {
+      newOrder.shopOrders.forEach((shopOrder) => {
+        const ownerSocketId = shopOrder.owner.socketId;
+        if (ownerSocketId) {
+          io.to(ownerSocketId).emit("newOrder", {
+            _id: newOrder._id,
+            paymentMethod: newOrder.paymentMethod,
+            user: newOrder.user,
+            shopOrders: shopOrder,
+            deliveryAddress: newOrder.deliveryAddress,
+            createdAt: newOrder.createdAt,
+            payment: newOrder.payment,
+          });
+        }
+      });
+    }
 
     return res.status(201).json(newOrder);
   } catch (error) {
@@ -121,7 +143,29 @@ export const verifyPayment = async (req, res) => {
     order.razorpayPayment = razorpayPaymentId;
     await order.populate("shopOrders.shopOrderItems.item", "name image price");
     await order.populate("shopOrders.shop", "name");
+    await order.populate("shopOrders.owner", "fullName socketId");
+    await order.populate("user", "fullName email mobile");
+
+    const io = req.app.get("io");
+
+    if (io) {
+      order.shopOrders.forEach((shopOrder) => {
+        const ownerSocketId = shopOrder?.owner.socketId;
+        if (ownerSocketId) {
+          io.to(ownerSocketId).emit("newOrder", {
+            _id: order._id,
+            paymentMethod: order.paymentMethod,
+            user: order.user,
+            shopOrders: shopOrder,
+            deliveryAddress: order.deliveryAddress,
+            createdAt: order.createdAt,
+            payment: order.payment,
+          });
+        }
+      });
+    }
     await order.save();
+
     return res.status(200).json(order);
   } catch (error) {
     return res.status(500).json({ message: `Verify payment error ${error}` });
@@ -240,7 +284,20 @@ export const updateOrderStatus = async (req, res) => {
       "shopOrders.assignedDeliveryBoy",
       "fullName email mobile "
     );
+    await order.populate("user", "fullName email mobile socketId");
 
+    const io = req.app.get("io");
+    if (io) {
+      const userSocketId = order.user.socketId;
+      if (userSocketId) {
+        io.to(userSocketId).emit("updateStatus", {
+          orderId: order._id,
+          shopId: updatedShopOrder.shop._id,
+          status: updatedShopOrder.status,
+          userId: order.user._id,
+        });
+      }
+    }
     return res.status(200).json({
       shopOrder: updatedShopOrder,
       assignedDeliveryBoy: updatedShopOrder?.assignedDeliveryBoy,
