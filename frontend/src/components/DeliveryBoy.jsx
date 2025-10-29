@@ -1,4 +1,4 @@
-import React from "react";
+import React, { use } from "react";
 import Nav from "./Nav";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -8,7 +8,7 @@ import { useState } from "react";
 import DeliveryBoyTracking from "./DeliveryBoyTracking";
 
 const DeliveryBoy = () => {
-  const { userData } = useSelector((state) => state.user);
+  const { userData, socket } = useSelector((state) => state.user);
   const [currentOrder, setCurrentOrder] = useState();
   const [otp, setOtp] = useState("");
   const [showOtpBox, setShowOtpBox] = useState(false);
@@ -83,6 +83,18 @@ const DeliveryBoy = () => {
     getAssignment();
     getCurrentOrder();
   }, [userData]);
+
+  useEffect(() => {
+    socket?.on("newAssignment", (data) => {
+      if (data.sentTo == userData._id) {
+        setAvailableAssignments((prev) => [...prev, data]);
+      }
+    });
+    return () => {
+      socket?.off("newAssignment");
+    };
+  }, []);
+
   return (
     <div className="w-screen min-h-screen flex flex-col gap-5 items-center bg-[#fff9f6] overflow-y-auto">
       <Nav />

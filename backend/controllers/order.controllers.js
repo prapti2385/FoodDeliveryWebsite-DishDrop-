@@ -263,6 +263,10 @@ export const updateOrderStatus = async (req, res) => {
         broadcastedTo: candidates,
         status: "broadcasted",
       });
+
+      // populate the created doc separately, not chained
+      await deliveryAssignment.populate("order");
+      await deliveryAssignment.populate("shop");
       shopOrder.assignedDeliveryBoy = deliveryAssignment.assignedTo;
       shopOrder.assignment = deliveryAssignment._id;
       deliveryBoysPayload = availableBoys.map((boy) => ({
@@ -272,6 +276,28 @@ export const updateOrderStatus = async (req, res) => {
         latitude: boy.location.coordinates?.[1],
         mobile: boy.mobile,
       }));
+      const io = req.app.get("io");
+      if (io) {
+        availableBoys.forEach((availableBoy) => {
+          const deliveryBoySocketId = availableBoy.socketId;
+          if (deliveryBoySocketId) {
+            io.to(deliveryBoySocketId).emit("newAssignment", {
+              sentTo: availableBoy._id,
+              assignmentId: deliveryAssignment._id,
+              orderId: deliveryAssignment.order._id,
+              shopName: deliveryAssignment.shop.name,
+              deliveryAddress: deliveryAssignment.order.deliveryAddress,
+              items:
+                deliveryAssignment.order.shopOrders.find((so) =>
+                  so._id.equals(deliveryAssignment.shopOrderId)
+                ).shopOrderItems || [],
+              subTotal: deliveryAssignment.order.shopOrders.find((so) =>
+                so._id.equals(deliveryAssignment.shopOrderId)
+              ).subTotal,
+            });
+          }
+        });
+      }
     }
 
     await shopOrder.save();
@@ -285,16 +311,16 @@ export const updateOrderStatus = async (req, res) => {
       "fullName email mobile "
     );
     await order.populate("user", "fullName email mobile socketId");
-
     const io = req.app.get("io");
     if (io) {
-      const userSocketId = order.user.socketId;
-      if (userSocketId) {
+      const userSocketId = order.user?.socketId;
+      const userId = order.user?._id;
+      if (userSocketId && userId) {
         io.to(userSocketId).emit("updateStatus", {
           orderId: order._id,
-          shopId: updatedShopOrder.shop._id,
+          shopId,
           status: updatedShopOrder.status,
-          userId: order.user._id,
+          userId,
         });
       }
     }
