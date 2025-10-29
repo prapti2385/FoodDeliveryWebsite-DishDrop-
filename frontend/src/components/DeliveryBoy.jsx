@@ -1,4 +1,4 @@
-import React, { use } from "react";
+import React from "react";
 import Nav from "./Nav";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -13,6 +13,7 @@ const DeliveryBoy = () => {
   const [otp, setOtp] = useState("");
   const [showOtpBox, setShowOtpBox] = useState(false);
   const [availableAssignments, setAvailableAssignments] = useState(null);
+  const [deliveryBoyLocation, setDeliveryBoyLocation] = useState(null);
   const getAssignment = async () => {
     try {
       const result = await axios.get(`${serverUrl}/api/order/get-assignments`, {
@@ -23,6 +24,33 @@ const DeliveryBoy = () => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (!socket || userData.role !== "Delivery Boy") return;
+    let watchId;
+    if (navigator.geolocation) {
+      (watchId = navigator.geolocation.watchPosition((position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        setDeliveryBoyLocation({ lat: latitude, lon: longitude });
+        socket.emit("updateLocation", {
+          latitude,
+          longitude,
+          deliveryBoyId: userData._id,
+        });
+      })),
+        (error) => {
+          console.log(error);
+        },
+        {
+          enableHighAccuracy: true,
+        };
+    }
+
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [socket, userData]);
 
   const acceptOrder = async (assignmentId) => {
     try {
@@ -67,7 +95,7 @@ const DeliveryBoy = () => {
     }
   };
 
-  const getCurrentOrder = async (req, res) => {
+  const getCurrentOrder = async () => {
     try {
       const result = await axios.get(
         `${serverUrl}/api/order/get-current-order`,
@@ -105,9 +133,9 @@ const DeliveryBoy = () => {
           </h1>
           <p className="text-[#ff4d2d]">
             <span className="font-semibold">Latitude:</span>{" "}
-            {userData.location.coordinates[1]},
+            {deliveryBoyLocation?.lat},{" "}
             <span className="font-semibold"> Longitude:</span>{" "}
-            {userData.location.coordinates[0]}
+            {deliveryBoyLocation?.lon}
           </p>
         </div>
         {!currentOrder && (
@@ -163,7 +191,18 @@ const DeliveryBoy = () => {
                 {currentOrder.shopOrder.shopOrderItems.length}
               </p>
             </div>
-            <DeliveryBoyTracking data={currentOrder} />
+            <DeliveryBoyTracking
+              data={{
+                deliveryBoyLocation: deliveryBoyLocation || {
+                  lat: userData.location.coordinates[1],
+                  lon: userData.location.coordinates[0],
+                },
+                customerLocation: {
+                  lat: currentOrder.deliveryAddress.latitude,
+                  lon: currentOrder.deliveryAddress.longitude,
+                },
+              }}
+            />
             {!showOtpBox ? (
               <button
                 className="mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-xl shadow-md hover:bg-green-600 active:scale-95 transition-all duration-200"

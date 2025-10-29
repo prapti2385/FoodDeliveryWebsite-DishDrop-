@@ -29,5 +29,33 @@ export const socketHandler = async (io) => {
         console.log(error);
       }
     });
+    socket.on(
+      "updateLocation",
+      async ({ deliveryBoyId, latitude, longitude }) => {
+        try {
+          const user = await User.findByIdAndUpdate(
+            deliveryBoyId,
+            {
+              location: {
+                type: "Point",
+                coordinates: [longitude, latitude],
+              },
+              isOnline: true,
+              socketId: socket.id,
+            },
+            { new: true }
+          );
+          if (user) {
+            io.emit("updateDeliveryLocation", {
+              latitude,
+              longitude,
+              deliveryBoyId,
+            });
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    );
   });
 };
