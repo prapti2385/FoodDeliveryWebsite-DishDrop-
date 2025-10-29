@@ -4,7 +4,7 @@ import { FaUtensils } from "react-icons/fa";
 import { FaPen } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import OwnerItemCard from "./ownerItemCard";
+import OwnerItemCard from "./OwnerItemCard";
 
 const OwnerDashboard = () => {
   const { myShopData } = useSelector((state) => state.owner);
