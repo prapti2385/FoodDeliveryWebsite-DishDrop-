@@ -6,6 +6,7 @@ import {
   getItemByCity,
   getItemById,
   getItemsByShop,
+  rating,
   searchItems,
 } from "../controllers/item.controllers.js";
 import isAuth from "../middlewares/isAuth.js";
@@ -20,4 +21,5 @@ itemRouter.get("/delete/:itemId", isAuth, deleteItem);
 itemRouter.get("/get-by-city/:city", getItemByCity);
 itemRouter.get("/get-by-shop/:shopId", getItemsByShop);
 itemRouter.get("/search-items", searchItems);
+itemRouter.post("/rating", rating);
 export default itemRouter;
