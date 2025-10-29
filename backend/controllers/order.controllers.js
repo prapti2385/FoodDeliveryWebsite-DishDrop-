@@ -540,3 +540,45 @@ export const verifyDeliveryOtp = async (req, res) => {
     return res.status(500).json({ message: `OTP verification error ${error}` });
   }
 };
+
+export const getTodayDeliveries = async (req, res) => {
+  try {
+    const deliveryBoyId = req.userId;
+    const startsOfDay = new Date();
+    startsOfDay.setHours(0, 0, 0, 0);
+    const orders = await Order.find({
+      "shopOrders.assignedDeliveryBoy": deliveryBoyId,
+      "shopOrders.status": "delivered",
+      "shopOrders.deliveredAt": { $gte: startsOfDay },
+    }).lean();
+
+    let todaysDeliveries = [];
+    orders.forEach((order) => {
+      order.shopOrders.forEach((shopOrder) => {
+        if (
+          String(shopOrder.assignedDeliveryBoy) === String(deliveryBoyId) &&
+          shopOrder.status === "delivered" &&
+          shopOrder.deliveredAt >= startsOfDay
+        ) {
+          todaysDeliveries.push(shopOrder);
+        }
+      });
+    });
+
+    let stats = {};
+    todaysDeliveries.forEach((shopOrder) => {
+      const hour = new Date(shopOrder.deliveredAt).getHours();
+      stats[hour] = (stats[hour] || 0) + 1;
+    });
+
+    let formattedStats = Object.keys(stats).map((hour) => ({
+      hour: parseInt(hour),
+      count: stats[hour],
+    }));
+
+    formattedStats.sort((a, b) => a.hour - b.hour);
+    return res.status(200).json(formattedStats);
+  } catch (error) {
+    return res.status(500).json({ message: "Todays delivery Error" });
+  }
+};
