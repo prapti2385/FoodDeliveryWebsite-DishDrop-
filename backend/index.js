@@ -17,7 +17,11 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://dishdrop.onrender.com",
+    origin: [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "https://dishdrop.onrender.com",
+    ],
     credentials: true,
     methods: ["POST", "GET"],
   },
@@ -28,10 +32,15 @@ app.set("io", io);
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://dishdrop.onrender.com",
+    origin: [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "https://dishdrop.onrender.com",
+    ],
     credentials: true,
   })
 );
+
 app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
